@@ -1,5 +1,5 @@
 FROM nvidia/cuda:8.0-devel-ubuntu16.04
-ARG PYTHON_VERSION=3.5
+ARG PYTHON_VERSION=3.6
 ARG NB_USER=ubuntu
 ENV OPENCV_DIR /opt/opencv
 ENV CAFFE_ROOT /opt/caffe
@@ -11,11 +11,10 @@ ARG CLONE_TAG=1.0
 ENV PYCAFFE_ROOT $CAFFE_ROOT/python
 ENV PYTHONPATH $PYCAFFE_ROOT:$PYTHONPATH
 ENV PATH $CAFFE_ROOT/build/tools:$PYCAFFE_ROOT:$PATH
-ENV OPENCV_VERSION=3.4.0
+ENV OPENCV_VERSION=3.3.1
 ENV CUDA_ENABLED=ON
 ENV OPENCL_ENABLE=OFF
 
-LABEL maintainer "Pierre-Luc Delisle <pierre-luc.delisle.1@ens.etsmtl.ca>"
 LABEL com.nvidia.cudnn.version="${CUDNN_VERSION}"
 LABEL com.nvidia.caffe.version="0.15"
 
@@ -193,6 +192,7 @@ RUN mkdir -p /src && \
     -D WITH_QT=OFF \
     -D WITH_IPP=ON \
     -D WITH_V4L=ON .. && \
+    -D WITH_FFMPEG=ON \
     make -j8 && \
     make install && \
     ldconfig && \
