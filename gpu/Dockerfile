@@ -1,5 +1,5 @@
 FROM nvidia/cuda:8.0-devel-ubuntu16.04
-ARG PYTHON_VERSION=3.6
+ARG PYTHON_VERSION=3.5
 ARG NB_USER=ubuntu
 ENV OPENCV_DIR /opt/opencv
 ENV CAFFE_ROOT /opt/caffe
@@ -154,10 +154,10 @@ RUN mkdir -p /src && \
     -D BUILD_PYTHON_SUPPORT=ON \
     -D BUILD_NEW_PYTHON_SUPPORT=ON \
     -D PYTHON_DEFAULT_EXECUTABLE=$(which python3) \
-    -D PYTHON_INCLUDE_DIR=/usr/include/python3.6 \
-    -D PYTHON_INCLUDE_DIR2=/usr/include/x86_64-linux-gnu/python3.6m \
-    -D PYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.6m.so \
-    -D PYTHON3_NUMPY_INCLUDE_DIRS=/usr/local/lib/python3.6/dist-packages/numpy/core/include/ \
+    -D PYTHON_INCLUDE_DIR=/usr/include/python3.5 \
+    -D PYTHON_INCLUDE_DIR2=/usr/include/x86_64-linux-gnu/python3.5m \
+    -D PYTHON_LIBRARY=/usr/lib/x86_64-linux-gnu/libpython3.5m.so \
+    -D PYTHON3_NUMPY_INCLUDE_DIRS=/usr/local/lib/python3.5/dist-packages/numpy/core/include/ \
     -D OPENCV_EXTRA_MODULES_PATH=$OPENCV_DIR/opencv_contrib-$OPENCV_VERSION/modules \
     -D WITH_TBB=ON \
     -D WITH_PTHREADS_PF=ON \
@@ -192,7 +192,6 @@ RUN mkdir -p /src && \
     -D WITH_QT=OFF \
     -D WITH_IPP=ON \
     -D WITH_V4L=ON .. && \
-    -D WITH_FFMPEG=ON \
     make -j8 && \
     make install && \
     ldconfig && \
@@ -211,7 +210,7 @@ RUN cd /src && \
         -D USE_CUDNN=$CUDA_ENABLED \
         -D BLAS=open \
         -D PYTHON_INCLUDE=/usr/bin/python3 \
-        /usr/lib/python3.6/dist-packages/numpy/core/include \
+        /usr/lib/python3.5/dist-packages/numpy/core/include \
         -D USE_OPENCV=ON \
         -D OPENCV_VERSION=3 \
         -D WITH_PYTHON_LAYER=ON .. && \
@@ -222,11 +221,21 @@ RUN cd /src && \
     echo "$CAFFE_ROOT/build/lib" >> /etc/ld.so.conf.d/caffe.conf && ldconfig && \
     rm -rf $CAFFE_ROOT
 
+#RUN pip3 install --upgrade setuptools
+#RUN pip3 install --upgrade pip
+#RUN pip install --upgrade setuptools
+#RUN pip install --upgrade pip
+
 RUN cd /home/ubuntu && \
     pip3 install virtualenv && \
-    pip3 install --upgrade --force-reinstall numpy \
+    virtualenv -p python3 ml_venv && \
+#    . ml_venv/bin/activate && \
+#    ln -s /usr/local/lib/python3.5/dist-packages/cv2.cpython-35m-x86_64-linux-gnu.so /home/ubuntu/ml_venv/lib/python3.5/site-packages/ && \
+    pip3 install --upgrade numpy \
                  protobuf \
-		 pandas \
+                 setuptools \
+                 pip \
+                 pandas \
                  Pillow \
                  future \
                  graphviz \
@@ -246,14 +255,14 @@ RUN cd /home/ubuntu && \
                  wheel \
                  boost \
                  pytest \
-		 librosa \
-		 grpcio \
-		 nose \
-		 flask \
-		 flask-restplus \
-                 http://download.pytorch.org/whl/cu80/torch-0.2.0.post3-cp35-cp35m-manylinux1_x86_64.whl && \
+                 librosa \
+                 grpcio \
+                 nose \
+                 flask \
+                 flask-restplus \
+                 http://download.pytorch.org/whl/cu80/torch-0.3.0.post4-cp35-cp35m-linux_x86_64.whl && \
     pip3 install torchvision && \
-    pip3 install git+https://github.com/hlin117/mdlp-discretization
+#    pip3 install git+https://github.com/hlin117/mdlp-discretization
 
 RUN mkdir $LIBGPUARRAY_DIR/ && \
 	cd /src && \
@@ -271,8 +280,11 @@ RUN mkdir $LIBGPUARRAY_DIR/ && \
 	cd /
 
 #USER $NB_USER
+#
 #EXPOSE 6006
+#
 #EXPOSE 5000
+
 WORKDIR /
 
-# CMD ["/bin/bash"]
+CMD ["/bin/bash"]
